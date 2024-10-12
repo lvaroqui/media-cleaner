@@ -1,11 +1,11 @@
-use color_eyre::{eyre::eyre, owo_colors::OwoColorize, Result};
+use color_eyre::{eyre::eyre, owo_colors::OwoColorize, Result, Section};
 use std::fmt::{Debug, Display};
 use tokio::try_join;
 
 use crate::{
     arr::{self, ArrData},
     config::Config,
-    overseerr::{MediaRequest, MediaStatus, ServerItem},
+    overseerr::{self, MediaRequest, MediaStatus, ServerItem},
     plex::PlexData,
     shared::MediaType,
     tautulli::{self, WatchHistory},
@@ -14,18 +14,20 @@ use crate::{
 
 #[derive(Debug)]
 pub struct MediaItem {
+    pub id: u32,
     pub title: Option<String>,
     pub rating_key: Option<String>,
     manager_id: Option<i32>,
     manager_4k_id: Option<i32>,
     pub media_type: MediaType,
-    media_status: MediaStatus,
+    pub media_status: MediaStatus,
     pub request: Option<MediaRequest>,
 }
 
 impl MediaItem {
     pub fn from_request(request: MediaRequest) -> Self {
         Self {
+            id: request.media_id,
             title: None,
             rating_key: request.rating_key.clone(),
             manager_id: request.manager_id,
@@ -38,6 +40,7 @@ impl MediaItem {
 
     pub fn from_server_item(item: ServerItem) -> Self {
         Self {
+            id: item.id,
             title: None,
             rating_key: Some(item.rating_key),
             manager_id: item.manager_id,
@@ -58,6 +61,7 @@ impl MediaItem {
         Ok(CompleteMediaItem {
             title: details.title.clone(),
             media_type: self.media_type,
+            media_id: self.id,
             request: self.request,
             history,
             arr_data,
@@ -143,7 +147,10 @@ impl MediaItem {
             )),
             (None, None) => Err(eyre!(
                 "No *arr id was found for request. Unable to gather file data."
-            )),
+            )
+            .with_suggestion(|| {
+                "Check that `Enable Scan` option is enabled in Overseer for Radarr and Sonarr and run them manually in `Jobs & Cache` section."
+            })),
         }
     }
 }
@@ -152,6 +159,7 @@ impl MediaItem {
 pub struct CompleteMediaItem {
     pub title: String,
     pub media_type: MediaType,
+    pub media_id: u32,
     request: Option<MediaRequest>,
     history: WatchHistory,
     arr_data: Option<ArrData>,
@@ -163,6 +171,8 @@ impl CompleteMediaItem {
         if let Some(request) = self.request {
             request.remove_request().await?;
         }
+
+        overseerr::remove_media(self.media_id).await?;
 
         if let Some(arr_data) = self.arr_data {
             arr_data.remove_data().await?;

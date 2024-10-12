@@ -28,9 +28,8 @@ pub struct MediaRequest {
 
 impl MediaRequest {
     pub async fn remove_request(self) -> Result<()> {
-        let path = format!("/media/{}", self.media_id);
+        let path = format!("/request/{}", self.id);
         api::delete(&path).await?;
-
         Ok(())
     }
 
@@ -109,7 +108,7 @@ pub struct ServerItem {
 impl ServerItem {
     pub async fn get_all() -> Result<Vec<Self>> {
         let response_data: RequestResponse<MediaResponse> =
-            api::get("/media", Some(vec![("filter", "available")])).await?;
+            api::get("/media", Some(vec![])).await?;
 
         let requests: Vec<Result<Self>> = response_data
             .results
@@ -152,4 +151,10 @@ impl ServerItem {
             media_type: response.media_type,
         })
     }
+}
+
+pub async fn remove_media(media_id: u32) -> Result<()> {
+    let path = format!("/media/{}", media_id);
+    api::delete(&path).await?;
+    Ok(())
 }

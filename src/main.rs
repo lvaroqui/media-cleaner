@@ -8,7 +8,10 @@ mod shared;
 mod tautulli;
 mod utils;
 
-use color_eyre::{eyre::eyre, Report, Result};
+use color_eyre::{
+    eyre::{eyre, Context},
+    Report, Result,
+};
 use futures::future;
 use itertools::Itertools;
 use overseerr::MediaRequest;
@@ -93,7 +96,11 @@ async fn get_deletion_items() -> Result<Vec<CompleteMediaItem>> {
         .filter(|i| i.is_available() && i.has_manager_active() && !i.user_ignored())
         .map(|item| {
             tokio::spawn(async move {
-                let item = item.into_complete_media().await?;
+                let media_id = item.id;
+                let rating_key = item.rating_key.clone().unwrap_or("unknown".to_string());
+                let item = item.into_complete_media().await.with_context(|| {
+                    format!("Media ID: `{media_id}` Rating Key: `{rating_key}`")
+                })?;
 
                 Ok::<CompleteMediaItem, Report>(item)
             })
