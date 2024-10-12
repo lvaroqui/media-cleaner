@@ -54,7 +54,7 @@ impl Config {
     }
 
     pub fn read_conf() -> Result<()> {
-        if let Some(_) = INSTANCE.get() {
+        if INSTANCE.get().is_some() {
             return Ok(());
         }
 
@@ -97,7 +97,7 @@ fn default_items_shown() -> usize {
 }
 
 fn clean_url(url: &mut String) {
-    if url.ends_with("/") {
+    if url.ends_with('/') {
         url.pop();
     }
 }

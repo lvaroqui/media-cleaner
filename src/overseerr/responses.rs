@@ -55,11 +55,11 @@ pub enum MediaStatus {
 impl Display for MediaStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Unknown => write!(f, "{}", "Unknown".red().to_string()),
-            Self::Pending => write!(f, "{}", "Pending".yellow().to_string()),
-            Self::Processing => write!(f, "{}", "Processing".yellow().to_string()),
-            Self::PartiallyAvailable => write!(f, "{}", "Partially Available".blue().to_string()),
-            Self::Available => write!(f, "{}", "Available".green().to_string()),
+            Self::Unknown => write!(f, "{}", "Unknown".red()),
+            Self::Pending => write!(f, "{}", "Pending".yellow()),
+            Self::Processing => write!(f, "{}", "Processing".yellow()),
+            Self::PartiallyAvailable => write!(f, "{}", "Partially Available".blue()),
+            Self::Available => write!(f, "{}", "Available".green()),
         }
     }
 }

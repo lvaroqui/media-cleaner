@@ -66,10 +66,10 @@ impl MediaItem {
     }
 
     pub fn is_available(&self) -> bool {
-        match &self.media_status {
-            MediaStatus::Available | MediaStatus::PartiallyAvailable => true,
-            _ => false,
-        }
+        matches!(
+            &self.media_status,
+            MediaStatus::Available | MediaStatus::PartiallyAvailable
+        )
     }
 
     pub fn has_manager_active(&self) -> bool {
@@ -229,6 +229,6 @@ impl Display for CompleteMediaItem {
 
         write!(f, "\n      {}", self.history)?;
 
-        write!(f, "\n")
+        writeln!(f)
     }
 }

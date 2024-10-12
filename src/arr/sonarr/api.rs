@@ -4,7 +4,7 @@ use color_eyre::{eyre::eyre, Result};
 use serde::de::DeserializeOwned;
 
 use crate::{
-    config::{Config, Sonarr},
+    config::Config,
     utils::{create_api_error_message, create_param_string},
 };
 
@@ -12,26 +12,25 @@ pub async fn get<T>(path: &str, params: Option<Vec<(&str, &str)>>, is_4k: bool) 
 where
     T: DeserializeOwned + Debug,
 {
-    let config: &Sonarr;
-    if is_4k {
-        config = match &Config::global().sonarr_4k {
+    let config = if is_4k {
+        match &Config::global().sonarr_4k {
             Some(sonarr) => sonarr,
             None => {
                 return Err(eyre!(
                     "Tried to access Sonarr config, even though it is not defined."
                 ))
             }
-        };
+        }
     } else {
-        config = match &Config::global().sonarr {
+        match &Config::global().sonarr {
             Some(sonarr) => sonarr,
             None => {
                 return Err(eyre!(
                     "Tried to access Sonarr config, even though it is not defined."
                 ))
             }
-        };
-    }
+        }
+    };
     let client = reqwest::Client::new();
     let params = create_param_string(params);
 

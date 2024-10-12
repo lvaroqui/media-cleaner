@@ -82,8 +82,8 @@ async fn get_deletion_items() -> Result<Vec<CompleteMediaItem>> {
         media_items.append(&mut not_requested_media_items);
 
         media_items.sort_by(|item1, item2| {
-            (&item1.rating_key, !item1.request.is_some())
-                .cmp(&(&item2.rating_key, !item2.request.is_some()))
+            (&item1.rating_key, item1.request.is_none())
+                .cmp(&(&item2.rating_key, item2.request.is_none()))
         });
         media_items.dedup_by(|item1, item2| item1.rating_key == item2.rating_key);
     }
@@ -121,13 +121,13 @@ async fn get_deletion_items() -> Result<Vec<CompleteMediaItem>> {
 }
 
 fn show_potential_request_errors(errs: Vec<Report>) -> Result<()> {
-    if errs.len() == 0 {
+    if errs.is_empty() {
         return Ok(());
     }
 
     println!("You got {} errors while gathering data. Press y to show them, or any other input to continue with the errored items ignored.", errs.len());
     let input = get_user_input()?;
-    if !input.starts_with("y") {
+    if !input.starts_with('y') {
         return Ok(());
     }
 
@@ -138,7 +138,7 @@ fn show_potential_request_errors(errs: Vec<Report>) -> Result<()> {
 
     println!("Do you want to see the full stack traces? Press y. Otherwise continuing to deletion screen with errored items ignored.");
     let inp = get_user_input()?;
-    if !inp.starts_with("y") {
+    if !inp.starts_with('y') {
         return Ok(());
     }
 
@@ -154,8 +154,8 @@ fn show_potential_request_errors(errs: Vec<Report>) -> Result<()> {
     Ok(())
 }
 
-fn show_requests_result(requests: &Vec<CompleteMediaItem>) -> Result<()> {
-    if requests.len() == 0 {
+fn show_requests_result(requests: &[CompleteMediaItem]) -> Result<()> {
+    if requests.is_empty() {
         println!("You do not seem to have any valid requests, with data available.");
         println!("Are you sure all your requests are available and downloaded? Or some data was unable to be acquired from other services.");
         println!("Either try again later, or look over your requests.");
@@ -168,7 +168,7 @@ fn show_requests_result(requests: &Vec<CompleteMediaItem>) -> Result<()> {
     Ok(())
 }
 
-fn choose_items_to_delete(requests: &mut Vec<CompleteMediaItem>) -> Result<Vec<usize>> {
+fn choose_items_to_delete(requests: &mut [CompleteMediaItem]) -> Result<Vec<usize>> {
     choose_sorting(requests)?;
 
     clear_screen()?;
@@ -177,10 +177,10 @@ fn choose_items_to_delete(requests: &mut Vec<CompleteMediaItem>) -> Result<Vec<u
     let chosen: Vec<usize> = MultiSelect::new()
         .with_prompt("Choose what media to delete (SPACE to select, ENTER to confirm selection)")
         .max_length(items_to_show)
-        .items(&requests)
+        .items(requests)
         .interact()?;
 
-    if chosen.len() == 0 {
+    if chosen.is_empty() {
         println!("No items selected. Exiting...");
         std::process::exit(0);
     }
@@ -192,7 +192,7 @@ fn choose_items_to_delete(requests: &mut Vec<CompleteMediaItem>) -> Result<Vec<u
     Ok(chosen)
 }
 
-fn choose_sorting(requests: &mut Vec<CompleteMediaItem>) -> Result<()> {
+fn choose_sorting(requests: &mut [CompleteMediaItem]) -> Result<()> {
     clear_screen()?;
 
     let args = Arguments::get_args();
@@ -236,16 +236,14 @@ fn choose_sorting_dialogue() -> Result<SortingOption> {
     }
 }
 
-fn verify_chosen(requests: &Vec<CompleteMediaItem>, chosen: &Vec<usize>) -> Result<()> {
+fn verify_chosen(requests: &[CompleteMediaItem], chosen: &[usize]) -> Result<()> {
     let total_size: String = human_file_size(
         chosen
             .iter()
             .filter_map(|selection| {
-                if let Some(media_item) = requests.get(*selection) {
-                    Some(media_item.get_disk_size())
-                } else {
-                    None
-                }
+                requests
+                    .get(*selection)
+                    .map(|media_item| media_item.get_disk_size())
             })
             .sum(),
     );
@@ -257,7 +255,7 @@ fn verify_chosen(requests: &Vec<CompleteMediaItem>, chosen: &Vec<usize>) -> Resu
     chosen.iter().for_each(|selection| {
         if let Some(media_item) = requests.get(*selection) {
             let media_type = media_item.media_type;
-            println!("- {} - {}", &media_item.title, media_type.to_string());
+            println!("- {} - {}", &media_item.title, media_type);
         } else {
             println!("- Unknown item");
         }
@@ -266,7 +264,7 @@ fn verify_chosen(requests: &Vec<CompleteMediaItem>, chosen: &Vec<usize>) -> Resu
     println!("\ny/n:");
     let user_input = get_user_input()?;
 
-    if !user_input.starts_with("y") {
+    if !user_input.starts_with('y') {
         println!("Cancelling...");
         std::process::exit(0);
     }
@@ -276,11 +274,11 @@ fn verify_chosen(requests: &Vec<CompleteMediaItem>, chosen: &Vec<usize>) -> Resu
 
 async fn delete_chosen_items(
     requests: &mut Vec<CompleteMediaItem>,
-    chosen: &Vec<usize>,
+    chosen: &[usize],
 ) -> Result<()> {
     let mut errs: Vec<(String, Report)> = Vec::new();
 
-    for selection in chosen.into_iter().rev() {
+    for selection in chosen.iter().rev() {
         let media_item = requests.swap_remove(*selection);
         let title = media_item.title.clone();
         if let Err(err) = media_item.remove_from_server().await {
@@ -288,7 +286,7 @@ async fn delete_chosen_items(
         }
     }
 
-    if errs.len() > 0 {
+    if !errs.is_empty() {
         println!("Had some errors deleting items:\n");
         errs.iter().for_each(|err| {
             println!(
@@ -323,7 +321,7 @@ fn get_user_input() -> Result<String> {
 
     Ok(user_input
         .strip_suffix("\r\n")
-        .or(user_input.strip_suffix("\n"))
+        .or(user_input.strip_suffix('\n'))
         .unwrap_or(&user_input)
         .to_string())
 }

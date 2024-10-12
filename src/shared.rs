@@ -50,31 +50,31 @@ impl SortingOption {
     pub fn from_str(s: &str) -> Result<Self> {
         match s {
             "nd" => {
-                return Ok(SortingOption {
+                Ok(SortingOption {
                     sorting_value: SortingValue::Name,
                     sorting_direction: Order::Desc,
                 })
             }
             "n" => {
-                return Ok(SortingOption {
+                Ok(SortingOption {
                     sorting_value: SortingValue::Name,
                     sorting_direction: Order::Asc,
                 })
             }
             "sa" => {
-                return Ok(SortingOption {
+                Ok(SortingOption {
                     sorting_value: SortingValue::Size,
                     sorting_direction: Order::Asc,
                 })
             }
             "s" => {
-                return Ok(SortingOption {
+                Ok(SortingOption {
                     sorting_value: SortingValue::Size,
                     sorting_direction: Order::Desc,
                 })
             }
             "t" => {
-                return Ok(SortingOption {
+                Ok(SortingOption {
                     sorting_value: SortingValue::Type,
                     sorting_direction: Order::Desc,
                 })

@@ -19,7 +19,7 @@ impl Arguments {
     }
 
     pub fn read_args() -> Result<()> {
-        if let Some(_) = INSTANCE.get() {
+        if INSTANCE.get().is_some() {
             return Ok(());
         }
 
@@ -55,6 +55,6 @@ impl Arguments {
             }
         }
 
-        return false;
+        false
     }
 }

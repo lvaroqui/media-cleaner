@@ -13,31 +13,19 @@ use crate::config::Config;
 use crate::shared::MediaType;
 
 pub fn movie_manger_active() -> bool {
-    match Config::global().radarr {
-        Some(_) => true,
-        None => false,
-    }
+    Config::global().radarr.is_some()
 }
 
 pub fn movie_4k_manager_active() -> bool {
-    match Config::global().radarr_4k {
-        Some(_) => true,
-        None => false,
-    }
+    Config::global().radarr_4k.is_some()
 }
 
 pub fn tv_manager_active() -> bool {
-    match Config::global().sonarr {
-        Some(_) => true,
-        None => false,
-    }
+    Config::global().sonarr.is_some()
 }
 
 pub fn tv_4k_manager_active() -> bool {
-    match Config::global().sonarr_4k {
-        Some(_) => true,
-        None => false,
-    }
+    Config::global().sonarr_4k.is_some()
 }
 
 #[derive(Debug)]
@@ -160,10 +148,7 @@ impl TvData {
             next_airing: get_potential_date_time(data.next_airing)?,
             status: data.status,
             season_count: data.statistics.season_count,
-            episodes_in_last_season: match episodes_in_last_season {
-                Some(count) => count,
-                None => 0,
-            },
+            episodes_in_last_season: episodes_in_last_season.unwrap_or(0),
             percent_of_episodes_on_disk: data.statistics.percent_of_episodes,
             size_on_disk: data.statistics.size_on_disk,
         })

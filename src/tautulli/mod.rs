@@ -35,10 +35,8 @@ impl WatchHistory {
             .iter()
             .map(|(user, movie_watch)| UserMovieWatch {
                 display_name: user.to_string(),
-                last_watched: unix_seconds_to_date(movie_watch.date).expect(&format!(
-                    "Failed to parse unix time for rating key {}",
-                    rating_key
-                )),
+                last_watched: unix_seconds_to_date(movie_watch.date).unwrap_or_else(|| panic!("Failed to parse unix time for rating key {}",
+                    rating_key)),
                 progress: movie_watch.percent_complete,
             })
             .collect();
@@ -51,10 +49,8 @@ impl WatchHistory {
             .iter()
             .map(|(user, tv_watch)| UserEpisodeWatch {
                 display_name: user.to_string(),
-                last_watched: unix_seconds_to_date(tv_watch.date).expect(&format!(
-                    "Failed to parse unix time for rating key {}",
-                    rating_key
-                )),
+                last_watched: unix_seconds_to_date(tv_watch.date).unwrap_or_else(|| panic!("Failed to parse unix time for rating key {}",
+                    rating_key)),
                 progress: tv_watch.percent_complete,
                 season: tv_watch.parent_media_index.unwrap(),
                 episode: tv_watch.media_index.unwrap(),
@@ -78,7 +74,7 @@ fn write_watches<T>(f: &mut std::fmt::Formatter, watches: &ItemWatches<T>) -> st
 where
     T: Display,
 {
-    if watches.len() > 0 {
+    if !watches.is_empty() {
         write!(f, "Watch history:")?;
         for watch in watches.iter() {
             write!(f, "\n      * {}", watch)?;
