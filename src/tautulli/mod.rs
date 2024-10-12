@@ -35,8 +35,9 @@ impl WatchHistory {
             .iter()
             .map(|(user, movie_watch)| UserMovieWatch {
                 display_name: user.to_string(),
-                last_watched: unix_seconds_to_date(movie_watch.date).unwrap_or_else(|| panic!("Failed to parse unix time for rating key {}",
-                    rating_key)),
+                last_watched: unix_seconds_to_date(movie_watch.date).unwrap_or_else(|| {
+                    panic!("Failed to parse unix time for rating key {}", rating_key)
+                }),
                 progress: movie_watch.percent_complete,
             })
             .collect();
@@ -49,8 +50,9 @@ impl WatchHistory {
             .iter()
             .map(|(user, tv_watch)| UserEpisodeWatch {
                 display_name: user.to_string(),
-                last_watched: unix_seconds_to_date(tv_watch.date).unwrap_or_else(|| panic!("Failed to parse unix time for rating key {}",
-                    rating_key)),
+                last_watched: unix_seconds_to_date(tv_watch.date).unwrap_or_else(|| {
+                    panic!("Failed to parse unix time for rating key {}", rating_key)
+                }),
                 progress: tv_watch.percent_complete,
                 season: tv_watch.parent_media_index.unwrap(),
                 episode: tv_watch.media_index.unwrap(),
@@ -211,6 +213,5 @@ fn movie_item_to_history_item(history: Vec<HistoryMovieItem>) -> Vec<HistoryItem
 }
 
 fn unix_seconds_to_date(unix_seconds: i64) -> Option<DateTime<Utc>> {
-    let naive_date = NaiveDateTime::from_timestamp_millis(unix_seconds * 1000).unwrap();
-    Some(DateTime::from_utc(naive_date, Utc))
+    DateTime::from_timestamp_millis(unix_seconds * 1000)
 }
