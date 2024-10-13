@@ -50,7 +50,7 @@ pub struct HistoryItem {
     pub user: String,
     pub date: i64,
     pub duration: u64,
-    pub percent_complete: u8,
+    pub percent_complete: u32,
     pub media_index: Option<u32>,
     pub parent_media_index: Option<u32>,
 }
@@ -60,6 +60,6 @@ pub struct HistoryItem {
 pub struct HistoryMovieItem {
     pub date: i64,
     pub duration: u64,
-    pub percent_complete: u8,
+    pub percent_complete: u32,
     pub user: String,
 }

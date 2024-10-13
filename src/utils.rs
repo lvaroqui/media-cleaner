@@ -14,7 +14,7 @@ pub fn create_api_error_message(code: u16, path: &str, service: &str) -> String 
         400 => format!("Got 400 Bad Request from {} at {}. The api may have changed, please report this on Github.", service, path),
         401 => format!("Got 401 Unauthorized from {}, please check the appropriate API key.", service),
         403 => format!("Got 403 Forbidden from {}, please check the appropriate API key.", service),
-        404 => format!("Got 404 Not Found from {} at path {}. Please make sure the URl is correct.", service, path),
+        404 => format!("Got 404 Not Found from {} at path {}. Please make sure the URL is correct.", service, path),
         505 => format!("Got 505 internal server error from {}. Please try again later.", service),
         code => {
             format!(

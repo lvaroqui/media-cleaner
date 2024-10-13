@@ -1,4 +1,7 @@
-use color_eyre::{eyre::eyre, Result};
+use color_eyre::{
+    eyre::{eyre, Context},
+    Result,
+};
 use serde::de::DeserializeOwned;
 
 use super::responses::ResponseObj;
@@ -32,7 +35,10 @@ where
         return Err(eyre!(create_api_error_message(code, &url, "Tautulli")));
     }
 
-    let response = response.json().await?;
+    let response = response
+        .json()
+        .await
+        .with_context(|| format!("URL: {}", url))?;
 
     Ok(response)
 }

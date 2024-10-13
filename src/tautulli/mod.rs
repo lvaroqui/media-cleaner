@@ -38,7 +38,7 @@ impl WatchHistory {
                 last_watched: unix_seconds_to_date(movie_watch.date).unwrap_or_else(|| {
                     panic!("Failed to parse unix time for rating key {}", rating_key)
                 }),
-                progress: movie_watch.percent_complete,
+                progress: movie_watch.percent_complete.try_into().unwrap_or(100),
             })
             .collect();
 
@@ -53,7 +53,7 @@ impl WatchHistory {
                 last_watched: unix_seconds_to_date(tv_watch.date).unwrap_or_else(|| {
                     panic!("Failed to parse unix time for rating key {}", rating_key)
                 }),
-                progress: tv_watch.percent_complete,
+                progress: tv_watch.percent_complete.try_into().unwrap_or(100),
                 season: tv_watch.parent_media_index.unwrap(),
                 episode: tv_watch.media_index.unwrap(),
             })
